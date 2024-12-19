@@ -5,11 +5,15 @@ from PIL import Image
 from io import BytesIO
 import time
 import threading
+from dotenv import load_dotenv
+import os
+
+load_dotenv("auth.env")
 
 # Spotify API credentials
-SPOTIFY_CLIENT_ID = "your_client_id"
-SPOTIFY_CLIENT_SECRET = "your_client_secret"
-SPOTIFY_REDIRECT_URI = "http://localhost:8888/callback"  # Redirect URI for OAuth
+SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 
 # Spotify API scope
 scope = "user-read-currently-playing"
@@ -47,6 +51,14 @@ def save_current_song_info():
             current_track = sp.current_user_playing_track()
             if current_track is None or current_track.get('is_playing') is False:
                 print("No song is currently playing.")
+                try:
+                    default_image = Image.open("default.png")
+                    default_image.save("album_cover.png")
+                    print("Default image set.")
+                except FileNotFoundError:
+                    print("default.png not found. Make sure it's in the same directory.")
+                with open("current_song.txt", "w") as file:
+                    file.write(f"")
                 time.sleep(1)  # Wait for 1 second before checking again
                 continue
 
@@ -64,9 +76,12 @@ def save_current_song_info():
 
             # Save song details to a text file
             with open("current_song.txt", "w") as file:
-                file.write(f"Title: {song_title}\n")
-                file.write(f"Artist: {song_artist}\n")
-                file.write(f"Album: {album_name}\n")
+                if len(song_title) > 30:
+                    song_title = song_title[:30]
+                if len(song_artist) > 20:
+                    song_artist = song_artist[:20]
+                file.write(f"{song_artist} - {song_title}")
+                # file.write(f"Album: {album_name}\n")
 
             # Download and save the album cover
             response = requests.get(album_cover_url)
