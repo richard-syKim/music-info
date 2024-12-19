@@ -44,6 +44,15 @@ def save_current_song_info():
     """Save the current song info to a file and refresh every second."""
     global running
     last_song_id = None  # Track the last played song to avoid unnecessary updates
+    set_bool = False
+    try:
+        default_image = Image.open("default.png")
+        default_image.save("album_cover.png")
+        print("Default image set.")
+    except FileNotFoundError:
+        print("default.png not found. Make sure it's in the same directory.")
+    with open("current_song.txt", "w") as file:
+        file.write(f"")
 
     while running:
         try:
@@ -51,24 +60,26 @@ def save_current_song_info():
             current_track = sp.current_user_playing_track()
             if current_track is None or current_track.get('is_playing') is False:
                 print("No song is currently playing.")
-                try:
-                    default_image = Image.open("default.png")
-                    default_image.save("album_cover.png")
-                    print("Default image set.")
-                except FileNotFoundError:
-                    print("default.png not found. Make sure it's in the same directory.")
-                with open("current_song.txt", "w") as file:
-                    file.write(f"")
+                if set_bool:
+                    try:
+                        default_image = Image.open("default.png")
+                        default_image.save("album_cover.png")
+                        print("Default image set.")
+                    except FileNotFoundError:
+                        print("default.png not found. Make sure it's in the same directory.")
+                    with open("current_song.txt", "w") as file:
+                        file.write(f"")
+                    set_bool = False
                 time.sleep(1)  # Wait for 1 second before checking again
                 continue
 
             # Extract song details
             song_id = current_track['item']['id']  # Unique song identifier
-            if song_id == last_song_id:
+            if song_id == last_song_id and set_bool:
                 # Skip updating if the song hasn't changed
                 time.sleep(1)
                 continue
-
+            
             song_title = current_track['item']['name']
             song_artist = ", ".join([artist['name'] for artist in current_track['item']['artists']])
             album_name = current_track['item']['album']['name']
@@ -94,6 +105,7 @@ def save_current_song_info():
 
             # Update the last song ID
             last_song_id = song_id
+            set_bool = True
 
         except Exception as e:
             print(f"Error: {e}")
