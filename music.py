@@ -88,9 +88,9 @@ def save_current_song_info():
             # Save song details to a text file
             with open("current_song.txt", "w") as file:
                 if len(song_title) > 30:
-                    song_title = song_title[:30]
+                    song_title = song_title[:30] + ".."
                 if len(song_artist) > 20:
-                    song_artist = song_artist[:20]
+                    song_artist = song_artist[:20] + ".."
                 file.write(f"{song_artist} - {song_title}")
                 # file.write(f"Album: {album_name}\n")
 
