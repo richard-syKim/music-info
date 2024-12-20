@@ -51,7 +51,7 @@ def save_current_song_info():
         print("Default image set.")
     except FileNotFoundError:
         print("default.png not found. Make sure it's in the same directory.")
-    with open("current_song.txt", "w") as file:
+    with open("current_song.txt", "w", encoding="utf-8") as file:
         file.write(f"")
 
     while running:
@@ -67,7 +67,7 @@ def save_current_song_info():
                         print("Default image set.")
                     except FileNotFoundError:
                         print("default.png not found. Make sure it's in the same directory.")
-                    with open("current_song.txt", "w") as file:
+                    with open("current_song.txt", "w", encoding="utf-8") as file:
                         file.write(f"")
                     set_bool = False
                 time.sleep(1)  # Wait for 1 second before checking again
@@ -86,7 +86,7 @@ def save_current_song_info():
             album_cover_url = current_track['item']['album']['images'][0]['url']
 
             # Save song details to a text file
-            with open("current_song.txt", "w") as file:
+            with open("current_song.txt", "w", encoding="utf-8") as file:
                 if len(song_title) > 30:
                     song_title = song_title[:30] + ".."
                 if len(song_artist) > 20:
