@@ -8,7 +8,16 @@ import threading
 from dotenv import load_dotenv
 import os
 
-load_dotenv("auth.env")
+# Get the absolute path to the directory containing this script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+print(script_dir)
+
+# Load .env file using absolute path
+dotenv_path = os.path.join(script_dir, "auth.env")
+load_dotenv(dotenv_path)
+
+print(dotenv_path)
 
 # Spotify API credentials
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
@@ -18,12 +27,15 @@ SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 # Spotify API scope
 scope = "user-read-currently-playing"
 
+cache_path = os.path.join(script_dir, ".cache")
+
 # Initialize Spotify client
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=SPOTIFY_CLIENT_ID,
     client_secret=SPOTIFY_CLIENT_SECRET,
     redirect_uri=SPOTIFY_REDIRECT_URI,
-    scope=scope
+    scope=scope,
+    cache_path=cache_path  # Store cache in script's directory
 ))
 
 # Flag to control the loop
@@ -45,13 +57,16 @@ def save_current_song_info():
     global running
     last_song_id = None  # Track the last played song to avoid unnecessary updates
     set_bool = False
+    default_path = os.path.join(script_dir, "default.png")
+    album_path = os.path.join(script_dir, "album_cover.png")
+    song_text_path = os.path.join(script_dir, "current_song.txt")
     try:
-        default_image = Image.open("default.png")
-        default_image.save("album_cover.png")
+        default_image = Image.open(default_path)
+        default_image.save(album_path)
         print("Default image set.")
     except FileNotFoundError:
         print("default.png not found. Make sure it's in the same directory.")
-    with open("current_song.txt", "w", encoding="utf-8") as file:
+    with open(song_text_path, "w", encoding="utf-8") as file:
         file.write(f"")
 
     while running:
@@ -62,12 +77,12 @@ def save_current_song_info():
                 print("No song is currently playing.")
                 if set_bool:
                     try:
-                        default_image = Image.open("default.png")
-                        default_image.save("album_cover.png")
+                        default_image = Image.open(default_path)
+                        default_image.save(album_path)
                         print("Default image set.")
                     except FileNotFoundError:
                         print("default.png not found. Make sure it's in the same directory.")
-                    with open("current_song.txt", "w", encoding="utf-8") as file:
+                    with open(song_text_path, "w", encoding="utf-8") as file:
                         file.write(f"")
                     set_bool = False
                 time.sleep(1)  # Wait for 1 second before checking again
@@ -86,7 +101,7 @@ def save_current_song_info():
             album_cover_url = current_track['item']['album']['images'][0]['url']
 
             # Save song details to a text file
-            with open("current_song.txt", "w", encoding="utf-8") as file:
+            with open(song_text_path, "w", encoding="utf-8") as file:
                 if len(song_title) > 30:
                     song_title = song_title[:30] + ".."
                 if len(song_artist) > 20:
@@ -98,7 +113,7 @@ def save_current_song_info():
             response = requests.get(album_cover_url)
             if response.status_code == 200:
                 image = Image.open(BytesIO(response.content))
-                image.save("album_cover.png")
+                image.save(album_path)
                 print(f"Updated: {song_title} by {song_artist}. Album cover saved.")
             else:
                 print("Failed to download album cover.")
