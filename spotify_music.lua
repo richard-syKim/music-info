@@ -1,9 +1,9 @@
 obs = obslua
 
 function script_load(settings)
-    os.execute('C:\\Path\\To\\YourScript.bat')  -- Run script on OBS start
+    os.execute('start "OBS with Music" cmd /k py "D:/Code Projects/Stream/music-info/music.py"')  -- Run script on OBS start
 end
 
 function script_unload()
-    os.execute('C:\\Path\\To\\YourStopScript.bat')  -- Run script on OBS close
+    os.execute('echo stop') -- doesn't work
 end
