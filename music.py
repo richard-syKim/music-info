@@ -57,6 +57,7 @@ def save_current_song_info():
     global running
     last_song_id = None  # Track the last played song to avoid unnecessary updates
     set_bool = False
+    none_playing_bool = False
     default_path = os.path.join(script_dir, "default.png")
     album_path = os.path.join(script_dir, "album_cover.png")
     song_text_path = os.path.join(script_dir, "current_song.txt")
@@ -74,7 +75,10 @@ def save_current_song_info():
             # Get currently playing song
             current_track = sp.current_user_playing_track()
             if current_track is None or current_track.get('is_playing') is False:
-                print("No song is currently playing.")
+                if not none_playing_bool:
+                    print("No song is currently playing.")
+                    none_playing_bool = True
+                    
                 if set_bool:
                     try:
                         default_image = Image.open(default_path)
